@@ -25,7 +25,7 @@ class MainActivity : FlutterActivity() {
                 if (data != null) {
                     val platform = call.argument<String>("platform")
                             ?: "facebook" // Default platform
-                    handleDataFromFlutter(data, platform)
+                    shareText(data, platform)
                     result.success("Data received successfully")
                 } else {
                     result.error("UNAVAILABLE", "Data not available.", null)
@@ -37,7 +37,8 @@ class MainActivity : FlutterActivity() {
 
     }
 
-    private fun handleDataFromFlutter(data: String, platform: String) {
+    // Share Text on Social Platform from Flutter
+    private fun shareText(data: String, platform: String) {
         Log.d("Platform", "Selected platform: $platform")
         val shareIntent = Intent()
         shareIntent.action = Intent.ACTION_SEND
@@ -77,5 +78,7 @@ class MainActivity : FlutterActivity() {
             Toast.makeText(context, "App not installed", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // Share Image on Social Platform from Flutter
 
 }
