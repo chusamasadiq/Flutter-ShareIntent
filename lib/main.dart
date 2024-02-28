@@ -80,15 +80,17 @@ class _ShareIntentState extends State<ShareIntent> {
     }
   }
 
-  void _shareImage(String platform) async {
+  Future<void> _shareImage(String platform) async {
     try {
       final ByteData bytes = await rootBundle.load('assets/flutter.jpg');
+      final Uint8List list = bytes.buffer.asUint8List();
       final tempDir = await getTemporaryDirectory();
-      final String tempImagePath = '${tempDir.path}/flutter.jpg';
-      await File(tempImagePath).writeAsBytes(bytes.buffer.asUint8List());
+      final file = await File('${tempDir.path}/flutter.jpg').create();
+      await file.writeAsBytes(list);
 
-      _shareImageChannel.invokeMethod(
-          'sendImage', {'platform': platform, 'imageUrl': tempImagePath});
+      // Invoke method channel with platform and image URL
+      await _shareImageChannel.invokeMethod(
+          'shareImage', {'platform': platform, 'imageUrl': file.path});
     } catch (e) {
       debugPrint('Share error: $e');
     }

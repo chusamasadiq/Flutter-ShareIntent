@@ -2,14 +2,16 @@ package com.example.share_intent
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.os.Parcelable
 import android.widget.Toast
 import androidx.annotation.NonNull
+import androidx.core.content.FileProvider
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 class MainActivity : FlutterActivity() {
     private val SHARE_TEXT_CHANNEL = "com.example.share_text_channel"
@@ -32,16 +34,22 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SHARE_IMAGE_CHANNEL)
                 .setMethodCallHandler { call, result ->
-                    if (call.method == "sendImage") {
+                    if (call.method == "shareImage") {
+                        val platform = call.argument<String>("platform")
                         val imageUrl = call.argument<String>("imageUrl")
-                        val platform = call.argument<String>("platform") ?: "facebook"
-                        imageUrl?.let { shareImage(platform, it) }
-                        result.success("Image data received successfully")
+
+                        if (platform != null && imageUrl != null) {
+                            shareImage(platform, imageUrl)
+                            result.success("Image shared successfully")
+                        } else {
+                            result.error("INVALID_PARAMETERS", "Missing platform or image URL", null)
+                        }
                     } else {
                         result.notImplemented()
                     }
                 }
     }
+
 
     private fun shareText(data: String, platform: String) {
         val shareIntent = Intent()
@@ -76,23 +84,31 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun shareImage(platform: String, imageUrl: String) {
-        val shareIntent = Intent()
-        shareIntent.action = Intent.ACTION_SEND
-        shareIntent.type = "image/jpg"
-        val uri = Uri.parse(imageUrl)
-        shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
+        val file = File(imageUrl)
+
+        if (!file.exists()) {
+            Toast.makeText(context, "Image file not found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "image/*"
+
+        val uri = FileProvider.getUriForFile(this, applicationContext.packageName + ".provider", file)
+
+        intent.putExtra(Intent.EXTRA_STREAM, uri as Parcelable)
 
         when (platform) {
             "Facebook" -> if (VERSION.SDK_INT >= VERSION_CODES.DONUT) {
-                shareIntent.setPackage("com.facebook.katana")
+                intent.setPackage("com.facebook.katana")
             }
 
             "WhatsApp" -> if (VERSION.SDK_INT >= VERSION_CODES.DONUT) {
-                shareIntent.setPackage("com.whatsapp")
+                intent.setPackage("com.whatsapp")
             }
 
             "Instagram" -> if (VERSION.SDK_INT >= VERSION_CODES.DONUT) {
-                shareIntent.setPackage("com.instagram.android")
+                intent.setPackage("com.instagram.android")
             }
 
             else -> {
@@ -102,9 +118,10 @@ class MainActivity : FlutterActivity() {
         }
 
         try {
-            startActivity(shareIntent)
+            startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(context, "App not installed", Toast.LENGTH_SHORT).show()
         }
     }
+
 }
