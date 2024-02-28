@@ -78,7 +78,7 @@ class MainActivity : FlutterActivity() {
     private fun shareImage(platform: String, imageUrl: String) {
         val shareIntent = Intent()
         shareIntent.action = Intent.ACTION_SEND
-        shareIntent.type = "image/*"
+        shareIntent.type = "image/jpg"
         val uri = Uri.parse(imageUrl)
         shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
 

@@ -26,66 +26,69 @@ class _ShareIntentState extends State<ShareIntent> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                TextField(
-                  controller: inputController,
-                  decoration: const InputDecoration(hintText: 'Input Text'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => sendDataToNative(
-                      inputController.text.toString(), 'Facebook'),
-                  icon: const Icon(Icons.share),
-                  label: const Text('Facebook'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => sendDataToNative(
-                      inputController.text.toString(), 'WhatsApp'),
-                  icon: const Icon(Icons.share),
-                  label: const Text('WhatsApp'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => sendDataToNative(
-                      inputController.text.toString(), 'Instagram'),
-                  icon: const Icon(Icons.share),
-                  label: const Text('Instagram'),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () => shareImage,
-                  icon: const Icon(Icons.share),
-                  label: const Text('Share Image'),
-                ),
-              ],
-            ),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextField(
+                controller: inputController,
+                decoration: const InputDecoration(hintText: 'Input Text'),
+              ),
+              Wrap(
+                runSpacing: 8,
+                children: [
+                  _buildShareButton(
+                      'Share Text to Facebook', () => _shareText('Facebook')),
+                  _buildShareButton(
+                      'Share Text to Instagram', () => _shareText('Instagram')),
+                  _buildShareButton(
+                      'Share Text to WhatsApp', () => _shareText('WhatsApp')),
+                ],
+              ),
+              Wrap(
+                runSpacing: 8,
+                children: [
+                  _buildShareButton(
+                      'Share Image to Facebook', () => _shareImage('Facebook')),
+                  _buildShareButton('Share Image to Instagram',
+                      () => _shareImage('Instagram')),
+                  _buildShareButton(
+                      'Share Image to WhatsApp', () => _shareImage('WhatsApp')),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  /// Share Text
-  void sendDataToNative(String data, String platform) async {
+  Widget _buildShareButton(String label, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(label),
+    );
+  }
+
+  void _shareText(String platform) async {
     try {
-      await _shareTextChannel
-          .invokeMethod('sendData', {'data': data, 'platform': platform});
+      await _shareTextChannel.invokeMethod('sendData',
+          {'data': inputController.text.toString(), 'platform': platform});
     } on PlatformException catch (e) {
       debugPrint("Failed to send data to native: '${e.message}'.");
     }
   }
 
-  /// Share Image
-  shareImage() async {
+  void _shareImage(String platform) async {
     try {
       final ByteData bytes = await rootBundle.load('assets/flutter.jpg');
-      final Uint8List list = bytes.buffer.asUint8List();
       final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/flutter.jpg').create();
-      file.writeAsBytesSync(list);
-      _shareImageChannel.invokeMethod('shareFile', 'flutter.jpg');
+      final String tempImagePath = '${tempDir.path}/flutter.jpg';
+      await File(tempImagePath).writeAsBytes(bytes.buffer.asUint8List());
+
+      _shareImageChannel.invokeMethod(
+          'sendImage', {'platform': platform, 'imageUrl': tempImagePath});
     } catch (e) {
       debugPrint('Share error: $e');
     }
