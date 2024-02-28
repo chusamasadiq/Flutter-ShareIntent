@@ -85,4 +85,20 @@ class _ShareIntentState extends State<ShareIntent> {
       ),
     );
   }
+
+  // _shareImage() async {
+  //   try {
+  //     final ByteData bytes = await rootBundle.load('assets/image.jpg');
+  //     final Uint8List list = bytes.buffer.asUint8List();
+  //
+  //     final tempDir = await getTemporaryDirectory();
+  //     final file = await new File('${tempDir.path}/image.jpg').create();
+  //     file.writeAsBytesSync(list);
+  //
+  //     final channel = const MethodChannel('channel:me.albie.share/share');
+  //     channel.invokeMethod('shareFile', 'image.jpg');
+  //   } catch (e) {
+  //     print('Share error: $e');
+  //   }
+  // }
 }

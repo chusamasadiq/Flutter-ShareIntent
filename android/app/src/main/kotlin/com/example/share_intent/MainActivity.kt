@@ -1,5 +1,6 @@
 package com.example.share_intent
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -112,6 +113,5 @@ class MainActivity : FlutterActivity() {
             Toast.makeText(context, "App not installed", Toast.LENGTH_SHORT).show()
         }
     }
-
 
 }
