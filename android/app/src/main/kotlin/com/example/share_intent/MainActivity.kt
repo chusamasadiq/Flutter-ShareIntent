@@ -13,13 +13,13 @@ import io.flutter.plugin.common.MethodChannel
 
 
 class MainActivity : FlutterActivity() {
-    private val DATA_CHANNEL = "com.example.data_channel"
+    private val SHARE_TEXT_CHANNEL = "com.example.share_text_channel"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
         // Method channel for receiving data from Flutter
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, DATA_CHANNEL).setMethodCallHandler { call, result ->
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SHARE_TEXT_CHANNEL).setMethodCallHandler { call, result ->
             if (call.method == "sendData") {
                 val data = call.argument<String>("data")
                 if (data != null) {
