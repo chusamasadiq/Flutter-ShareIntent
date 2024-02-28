@@ -14,23 +14,7 @@ class ShareIntent extends StatefulWidget {
 
 class _ShareIntentState extends State<ShareIntent> {
   final TextEditingController inputController = TextEditingController();
-  static const platform = MethodChannel('samples.flutter.dev/battery');
   static const _channel = MethodChannel('com.example.data_channel');
-  String _batteryLevel = 'Unknown battery level.';
-
-  Future<void> _getBatteryLevel() async {
-    String batteryLevel;
-    try {
-      final result = await platform.invokeMethod<int>('getBatteryLevel');
-      batteryLevel = 'Battery level at $result % .';
-    } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
-    }
-
-    setState(() {
-      _batteryLevel = batteryLevel;
-    });
-  }
 
   void sendDataToNative(String data, String platform) async {
     try {
@@ -51,11 +35,6 @@ class _ShareIntentState extends State<ShareIntent> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: _getBatteryLevel,
-                  child: const Text('Get Battery Level'),
-                ),
-                Text(_batteryLevel),
                 TextField(
                   controller: inputController,
                   decoration: const InputDecoration(hintText: 'Input Text'),
@@ -86,19 +65,19 @@ class _ShareIntentState extends State<ShareIntent> {
     );
   }
 
-  // _shareImage() async {
-  //   try {
-  //     final ByteData bytes = await rootBundle.load('assets/image.jpg');
-  //     final Uint8List list = bytes.buffer.asUint8List();
-  //
-  //     final tempDir = await getTemporaryDirectory();
-  //     final file = await new File('${tempDir.path}/image.jpg').create();
-  //     file.writeAsBytesSync(list);
-  //
-  //     final channel = const MethodChannel('channel:me.albie.share/share');
-  //     channel.invokeMethod('shareFile', 'image.jpg');
-  //   } catch (e) {
-  //     print('Share error: $e');
-  //   }
-  // }
+// _shareImage() async {
+//   try {
+//     final ByteData bytes = await rootBundle.load('assets/image.jpg');
+//     final Uint8List list = bytes.buffer.asUint8List();
+//
+//     final tempDir = await getTemporaryDirectory();
+//     final file = await new File('${tempDir.path}/image.jpg').create();
+//     file.writeAsBytesSync(list);
+//
+//     final channel = const MethodChannel('channel:me.albie.share/share');
+//     channel.invokeMethod('shareFile', 'image.jpg');
+//   } catch (e) {
+//     print('Share error: $e');
+//   }
+// }
 }
